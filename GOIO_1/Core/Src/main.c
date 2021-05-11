@@ -1,4 +1,4 @@
-  /* USER CODE BEGIN Header */
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -19,7 +19,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
+#include "dma.h"
+#include "usart.h"
 #include "gpio.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -54,6 +58,12 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+unsigned char Rx_Buffer[1];
+uint8_t Rx_Data[2];
+
+uint8_t USART1_len=0;
+uint8_t USART1_rx_end=0;
+
 
 /* USER CODE END 0 */
 
@@ -61,6 +71,14 @@ void SystemClock_Config(void);
   * @brief  The application entry point.
   * @retval int
   */
+
+int _write(int file, unsigned char* p, int len)
+{
+   HAL_UART_Transmit(&huart1, p, len, 10);
+   return len;
+}
+
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -78,6 +96,8 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
+  uint32_t ADC_Value_32[1]={0};
+  uint16_t ADC_Value_16;
 
   /* USER CODE BEGIN SysInit */
 
@@ -85,8 +105,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_USART1_UART_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  HAL_UART_Receive_IT(&huart1, Rx_Buffer,1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -94,6 +117,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  HAL_ADC_Start_DMA(&hadc1, ADC_Value_32, 1);
+	  	HAL_Delay(1000);
+	  	ADC_Value_16=(uint16_t)ADC_Value_32[0];
+	  	ADC_Value_16 &= 0xFFF;
+	  printf("\n ADC=%d", ADC_Value_16);
 
     /* USER CODE BEGIN 3 */
   }
@@ -108,6 +136,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -136,6 +165,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /* USER CODE BEGIN 4 */
@@ -153,6 +188,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+
   }
   /* USER CODE END Error_Handler_Debug */
 }

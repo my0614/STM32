@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 792f645e9f37c4952354bc1ebdf615202b685138
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -214,4 +217,7 @@ void assert_failed(uint8_t *file, uint32_t line)
 #endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+<<<<<<< HEAD
 
+=======
+>>>>>>> 792f645e9f37c4952354bc1ebdf615202b685138
